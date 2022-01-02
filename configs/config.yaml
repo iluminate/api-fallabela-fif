@@ -1,0 +1,9 @@
+mongodb:
+  uri: mongodb://localhost:27017
+  database: admin
+
+currency:
+  url: https://dfa5b281-0c47-4c53-b641-0629c765aaaf.mock.pstmn.io
+  endpoints:
+    live: live
+  api_key: 41828eb46c449c80a074234172fa9498

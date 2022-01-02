@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  mongo:
+    #image: mongo:3.6.0
+    image: mongo:4.4.11
+    container_name: db-fallabela-fif
+    ports:
+      - "27017:27017"
+  api:
+    image: kevin24ec/api-fallabela-fif:1.0
+    container_name: api-fallabela-fif
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
