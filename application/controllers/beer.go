@@ -11,17 +11,17 @@ import (
 )
 
 type BeerHandler struct {
-	beerService     services.IBeerService
-	exchangeService services.IExchangeService
+	BeerService     services.IBeerService
+	ExchangeService services.IExchangeService
 }
 
 func NewBeerHandler(service services.IBeerService, exchangeService services.IExchangeService) *BeerHandler {
-	return &BeerHandler{beerService: service, exchangeService: exchangeService}
+	return &BeerHandler{BeerService: service, ExchangeService: exchangeService}
 }
 
 func (handler *BeerHandler) GetBeers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	beers, _ := handler.beerService.FindAll()
+	beers, _ := handler.BeerService.FindAll()
 	w.WriteHeader(http.StatusOK)
 	encoder := json.NewEncoder(w)
 	encoder.Encode(beers)
@@ -35,7 +35,7 @@ func (handler *BeerHandler) PostBeers(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("invalid request"))
 		return
 	}
-	err = handler.beerService.Create(&beer)
+	err = handler.BeerService.Create(&beer)
 	if err != nil {
 		w.WriteHeader(http.StatusConflict)
 		w.Write([]byte("beer id alreay exist"))
@@ -49,7 +49,7 @@ func (handler *BeerHandler) GetBeersPerId(w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 	id := mux.Vars(r)["id"]
 	_id, _ := strconv.ParseInt(id, 10, 64)
-	beer, err := handler.beerService.FindById(_id)
+	beer, err := handler.BeerService.FindById(_id)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("beer not found"))
@@ -64,16 +64,16 @@ func (handler *BeerHandler) GetBoxPrixePerId(w http.ResponseWriter, r *http.Requ
 	w.Header().Set("Content-Type", "application/json")
 	id := mux.Vars(r)["id"]
 	_id, _ := strconv.ParseInt(id, 10, 64)
-	beer, err := handler.beerService.FindById(_id)
+	beer, err := handler.BeerService.FindById(_id)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("beer not found"))
 		return
 	}
-	exchange, err := handler.exchangeService.Live()
+	exchange, err := handler.ExchangeService.Live()
 	if err != nil {
-		w.WriteHeader(http.StatusConflict)
-		w.Write([]byte("exchange service error"))
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		return
 	}
 	oldCurrency := beer.Currency

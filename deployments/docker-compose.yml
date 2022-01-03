@@ -1,8 +1,7 @@
 version: '3.8'
 
 services:
-  mongo:
-    #image: mongo:3.6.0
+  db:
     image: mongo:4.4.11
     container_name: db-fallabela-fif
     ports:
@@ -13,3 +12,7 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
+    links:
+      - db
+    depends_on:
+      - db

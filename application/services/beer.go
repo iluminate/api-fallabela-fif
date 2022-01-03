@@ -6,16 +6,16 @@ import (
 	"api-fallabela-fif/application/repositories"
 )
 
-type beerService struct {
-	repo repositories.IBeerRepository
+type BeerService struct {
+	Repo repositories.IBeerRepository
 }
 
-func NewBeerService(repo repositories.IBeerRepository) *beerService {
-	return &beerService{repo: repo}
+func NewBeerService(repo repositories.IBeerRepository) *BeerService {
+	return &BeerService{Repo: repo}
 }
 
-func (service beerService) FindById(id int64) (*models.Beer, error) {
-	beer, err := service.repo.FindById(id)
+func (service BeerService) FindById(id int64) (*models.Beer, error) {
+	beer, err := service.Repo.FindById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -29,8 +29,8 @@ func (service beerService) FindById(id int64) (*models.Beer, error) {
 	}, nil
 }
 
-func (service beerService) FindAll() (*[]models.Beer, error) {
-	beers, err := service.repo.FindAll()
+func (service BeerService) FindAll() (*[]models.Beer, error) {
+	beers, err := service.Repo.FindAll()
 	if err != nil {
 		return nil, err
 	}
@@ -48,8 +48,8 @@ func (service beerService) FindAll() (*[]models.Beer, error) {
 	return &res, nil
 }
 
-func (service beerService) Create(beer *models.Beer) error {
-	return service.repo.Create(&entities.Beer{
+func (service BeerService) Create(beer *models.Beer) error {
+	return service.Repo.Create(&entities.Beer{
 		Id:       beer.Id,
 		Name:     beer.Name,
 		Brewery:  beer.Brewery,
