@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"api-fallabela-fif/application/constants"
 	"api-fallabela-fif/application/models"
 	"api-fallabela-fif/application/services"
 	"api-fallabela-fif/application/utils"
@@ -80,10 +81,12 @@ func (handler *BeerHandler) GetBoxPrixePerId(w http.ResponseWriter, r *http.Requ
 	newCurrency := r.URL.Query().Get("currency")
 	amountStr := r.URL.Query().Get("quantity")
 	var amountInt, priceExchange float64
-	amountInt = utils.ParseFloat(amountStr, amountInt)
+	amountInt = utils.ParseFloat(amountStr)
 	totalPrice := beer.Price * amountInt
 	if newCurrency != "" {
-		priceExchange = (totalPrice / exchange.Quotes["USD"+oldCurrency]) * exchange.Quotes["USD"+newCurrency]
+		exchangeOtherToUsd := exchange.Quotes[constants.CURRENCY_USD+oldCurrency]
+		exchangeUsdToOther := exchange.Quotes[constants.CURRENCY_USD+newCurrency]
+		priceExchange = utils.ExchangeToUSD(totalPrice, exchangeOtherToUsd) * exchangeUsdToOther
 	} else {
 		priceExchange = totalPrice
 	}
