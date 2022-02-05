@@ -3,7 +3,10 @@ package mocks
 import (
 	"api-fallabela-fif/application/entities"
 	"api-fallabela-fif/application/models"
+	"encoding/json"
 	"github.com/stretchr/testify/mock"
+	"net/http"
+	"net/http/httptest"
 	"time"
 )
 
@@ -11,19 +14,18 @@ type MockContext struct {
 	mock.Mock
 }
 
-func (MockContext) Deadline() (deadline time.Time, ok bool) {
-	//TODO implement me
-	panic("implement me")
+func (m *MockContext) Deadline() (deadline time.Time, ok bool) {
+	args := m.Called()
+	return args.Get(0).(time.Time), args.Bool(1)
 }
 
-func (MockContext) Done() <-chan struct{} {
-	//TODO implement me
-	panic("implement me")
+func (m *MockContext) Done() <-chan struct{} {
+	return nil
 }
 
-func (MockContext) Err() error {
-	//TODO implement me
-	panic("implement me")
+func (m *MockContext) Err() error {
+	args := m.Called()
+	return args.Error(0)
 }
 
 func (m *MockContext) Value(key interface{}) interface{} {
@@ -85,4 +87,14 @@ func (m *MockBeerRepository) FindAll() (*[]entities.Beer, error) {
 func (m *MockBeerRepository) Create(beer *entities.Beer) error {
 	args := m.Called(beer)
 	return args.Error(0)
+}
+
+func MockServerWithOut(response interface{}) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		out, err := json.Marshal(response)
+		if err != nil {
+			panic(err)
+		}
+		w.Write(out)
+	}))
 }

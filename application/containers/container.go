@@ -7,6 +7,7 @@ import (
 	"api-fallabela-fif/application/utils"
 	"api-fallabela-fif/helpers/database"
 	"log"
+	"net/http"
 )
 
 func mongoConfig() map[string]string {
@@ -48,5 +49,5 @@ func ExchangeService() services.IExchangeService {
 	url := config.Currency.Url
 	endpoints := map[string]string{"live": config.Currency.Endpoints.Live}
 	token := config.Currency.ApiKey
-	return services.NewExchangeService(url, endpoints, token)
+	return services.NewExchangeService(url, endpoints, token, &http.Client{})
 }
