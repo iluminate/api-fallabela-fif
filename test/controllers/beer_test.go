@@ -92,7 +92,7 @@ func TestBeerHandler_GetBeersPerId(t *testing.T) {
 	}
 }
 
-func TestBeerHandler_GetBoxPrixePerId(t *testing.T) {
+func TestBeerHandler_GetBoxPricePerId(t *testing.T) {
 	mockBeerService := new(mocks.MockBeerService)
 	mockBeerService.On("FindById", int64(1)).Return(&models.Beer{}, nil)
 	mockBeerService.On("FindById", int64(2)).Return(nil, errors.New("no document"))
@@ -113,12 +113,22 @@ func TestBeerHandler_GetBoxPrixePerId(t *testing.T) {
 		fields fields
 		args   args
 	}{
-		{name: "success", fields: fields{
+		{name: "success1", fields: fields{
 			beerService:     mockBeerService,
 			exchangeService: mockExchangeService,
 		}, args: args{
 			w: httptest.NewRecorder(),
 			r: makeHttpRequest("GET", "/beers/1/boxprice", map[string]string{"id": "1"}, nil),
+		}},
+		{name: "success2", fields: fields{
+			beerService:     mockBeerService,
+			exchangeService: mockExchangeService,
+		}, args: args{
+			w: httptest.NewRecorder(),
+			r: makeHttpRequest(
+				"GET",
+				"/beers/1/boxprice?currency=EUR&quantity=2",
+				map[string]string{"id": "1"}, nil),
 		}},
 		{name: "failure1", fields: fields{
 			beerService:     mockBeerService,
