@@ -3,8 +3,12 @@ package mocks
 import (
 	"api-fallabela-fif/application/entities"
 	"api-fallabela-fif/application/models"
+	"api-fallabela-fif/helpers/database"
+	"context"
 	"encoding/json"
 	"github.com/stretchr/testify/mock"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
 	"net/http/httptest"
 	"time"
@@ -97,4 +101,37 @@ func MockServerWithOut(response interface{}) *httptest.Server {
 		}
 		w.Write(out)
 	}))
+}
+
+type MockMongodbHelper struct {
+	mock.Mock
+}
+
+func (m *MockMongodbHelper) Collection(name string) database.IMongoCollection {
+	args := m.Called(name)
+	return args.Get(0).(database.IMongoCollection)
+}
+
+func (m *MockMongodbHelper) Open() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+type MockMongoCollection struct {
+	mock.Mock
+}
+
+func (m *MockMongoCollection) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+	args := m.Called(ctx, document)
+	return args.Get(0).(*mongo.InsertOneResult), args.Error(1)
+}
+
+func (m *MockMongoCollection) Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) (*mongo.Cursor, error) {
+	args := m.Called(ctx, filter)
+	return args.Get(0).(*mongo.Cursor), args.Error(1)
+}
+
+func (m *MockMongoCollection) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
+	args := m.Called(ctx, filter)
+	return args.Get(0).(*mongo.SingleResult)
 }
