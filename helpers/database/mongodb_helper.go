@@ -9,32 +9,47 @@ import (
 	"time"
 )
 
+type IMongodbHelper interface {
+	Collection(name string) IMongoCollection
+	Open() error
+}
+
+type IMongoCollection interface {
+	InsertOne(ctx context.Context, document interface{},
+		opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error)
+	Find(ctx context.Context, filter interface{},
+		opts ...*options.FindOptions) (*mongo.Cursor, error)
+	FindOne(ctx context.Context, filter interface{},
+		opts ...*options.FindOneOptions) *mongo.SingleResult
+}
+
 type MongodbHelper struct {
-	client *mongo.Client
-	conf   map[string]string
+	Client *mongo.Client
+	Conf   map[string]string
 }
 
 func NewMongodbHelper(conf map[string]string) *MongodbHelper {
 	return &MongodbHelper{
-		conf: conf,
+		Conf: conf,
 	}
 }
-func (helper *MongodbHelper) Collection(name string) *mongo.Collection {
-	return helper.client.Database(helper.conf["database"]).Collection(name)
+
+func (helper *MongodbHelper) Collection(name string) IMongoCollection {
+	return helper.Client.Database(helper.Conf["database"]).Collection(name)
 }
 
 func (helper *MongodbHelper) Open() error {
 	var err error
-	if helper.client != nil {
+	if helper.Client != nil {
 		return nil
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	helper.client, err = mongo.Connect(ctx, options.Client().ApplyURI(helper.conf["uri"]))
+	helper.Client, err = mongo.Connect(ctx, options.Client().ApplyURI(helper.Conf["uri"]))
 	if err != nil {
 		return err
 	}
-	err = helper.client.Ping(context.TODO(), nil)
+	err = helper.Client.Ping(context.TODO(), nil)
 	if err != nil {
 		defer helper.close()
 		return err
@@ -44,7 +59,7 @@ func (helper *MongodbHelper) Open() error {
 }
 
 func (helper *MongodbHelper) close() error {
-	err := helper.client.Disconnect(context.TODO())
+	err := helper.Client.Disconnect(context.TODO())
 	if err != nil {
 		return err
 	}

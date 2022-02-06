@@ -5,23 +5,24 @@ import (
 	"api-fallabela-fif/helpers/database"
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
-	"log"
 )
 
-type beerRepository struct {
-	database *database.MongodbHelper
+const collectionName = "beers"
+
+type BeerRepository struct {
+	Database database.IMongodbHelper
 }
 
-func NewBeerRepository(database *database.MongodbHelper) *beerRepository {
-	return &beerRepository{database: database}
+func NewBeerRepository(database database.IMongodbHelper) *BeerRepository {
+	return &BeerRepository{Database: database}
 }
 
-func (repo beerRepository) FindById(id int64) (*entities.Beer, error) {
-	err := repo.database.Open()
+func (repo BeerRepository) FindById(id int64) (*entities.Beer, error) {
+	err := repo.Database.Open()
 	if err != nil {
 		return nil, err
 	}
-	collection := repo.database.Collection("beers")
+	collection := repo.Database.Collection(collectionName)
 	ctx := context.Background()
 	var beer entities.Beer
 	filters := bson.D{
@@ -34,19 +35,20 @@ func (repo beerRepository) FindById(id int64) (*entities.Beer, error) {
 	return &beer, nil
 }
 
-func (repo beerRepository) FindAll() (*[]entities.Beer, error) {
-	err := repo.database.Open()
+func (repo BeerRepository) FindAll() (*[]entities.Beer, error) {
+	var beers []entities.Beer
+	err := repo.Database.Open()
 	if err != nil {
 		return nil, err
 	}
-	collection := repo.database.Collection("beers")
+	collection := repo.Database.Collection(collectionName)
 	ctx := context.Background()
 	cur, err := collection.Find(ctx, bson.D{})
 	if err != nil {
-		log.Fatal(err)
+		return &beers, err
 	}
 	defer cur.Close(ctx)
-	var beers []entities.Beer
+
 	for cur.Next(ctx) {
 		var beer entities.Beer
 		err = cur.Decode(&beer)
@@ -58,12 +60,12 @@ func (repo beerRepository) FindAll() (*[]entities.Beer, error) {
 	return &beers, nil
 }
 
-func (repo beerRepository) Create(beer *entities.Beer) error {
-	err := repo.database.Open()
+func (repo BeerRepository) Create(beer *entities.Beer) error {
+	err := repo.Database.Open()
 	if err != nil {
 		return err
 	}
-	collection := repo.database.Collection("beers")
+	collection := repo.Database.Collection(collectionName)
 	ctx := context.Background()
 	_, err = collection.InsertOne(ctx, beer)
 	if err != nil {
